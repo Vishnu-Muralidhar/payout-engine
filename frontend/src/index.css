@@ -2,11 +2,11 @@
 
 @theme {
   --color-payto-dark: #000000;
-  --color-payto-card: #111111;
+  --color-payto-card: #080808;
   --color-payto-accent: #ffffff;
   --color-payto-accent-hover: #d4d4d8;
   --color-payto-text: #fafafa;
-  --color-payto-muted: #a1a1aa;
+  --color-payto-muted: #737373;
   --color-payto-success: #10b981;
   --color-payto-error: #ef4444;
   --color-payto-warning: #f59e0b;
@@ -14,10 +14,69 @@
 
 @layer base {
   body {
-    @apply bg-payto-dark text-payto-text font-sans antialiased;
+    @apply bg-payto-dark text-payto-text antialiased;
+    font-family: 'Outfit', sans-serif;
   }
 }
 
 .glass-panel {
-  @apply bg-payto-card border border-white/5 shadow-2xl rounded-2xl;
+  @apply bg-payto-card border border-white/10 backdrop-blur-[30px] rounded-2xl;
+  box-shadow: 0 0 40px -10px rgba(255, 255, 255, 0.03);
+}
+
+.magnetic-row {
+  @apply bg-[#0c0c0c] border border-white/5 rounded-xl p-4 transition-all duration-300;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+}
+
+.magnetic-row:hover {
+  @apply border-white/15 bg-[#111111];
+  box-shadow: 0 8px 30px -5px rgba(255, 255, 255, 0.08);
+}
+
+/* Mercury Liquid Animation */
+@keyframes liquidFlow {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(0%); }
+  100% { transform: translateX(100%); }
+}
+
+.mercury-liquid {
+  position: relative;
+  overflow: hidden;
+}
+
+.mercury-liquid::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0.2) 80%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: liquidFlow 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Gold Shimmer Effect */
+@keyframes shimmerSweep {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 215, 0, 0) 0%,
+    rgba(255, 215, 0, 0.1) 50%,
+    rgba(255, 215, 0, 0) 100%
+  );
+  background-size: 200% auto;
+  animation: shimmerSweep 2s ease-out forwards;
 }
