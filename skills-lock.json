@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "skills": {
+    "django-best-practices": {
+      "source": "reyretee/django-skills",
+      "sourceType": "github",
+      "computedHash": "934edc1ec986a8cd13a52909b1a1c2158c1040bb5c625d757be910bf99f4ed8c"
+    },
+    "postgresql-expert": {
+      "source": "personamanagmentlayer/pcl",
+      "sourceType": "github",
+      "computedHash": "d4ae5433868be7504968d405c6187aa784051ac134d9cecf14dd3b424fcc16cc"
+    },
+    "pytest-django-patterns": {
+      "source": "kjnez/claude-code-django",
+      "sourceType": "github",
+      "computedHash": "0e08519966cf9b281ff774e60313965e4670eec39d5b02d850577db0cfb7bbc3"
+    },
+    "rest-api-design": {
+      "source": "aj-geddes/useful-ai-prompts",
+      "sourceType": "github",
+      "computedHash": "4e84e39b1a3915ee1920f504b2b08b5d1d836f100c8d389dd0b48e9c3cfc9d4c"
+    },
+    "tanstack-query-best-practices": {
+      "source": "deckardger/tanstack-agent-skills",
+      "sourceType": "github",
+      "computedHash": "addf4358803d7746f7fe0475a3370d835775217e00dd5fc7bbd8a7d6c53d81e5"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "ca7b0c0c6e5f2750043f7f0cd72d16ac4e2abc48f9b5500d047a4b77a2506212"
+    }
+  }
+}
