@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CreditCard, Activity, CheckCircle, Clock, XCircle, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { getBalance, getPayouts, createPayout } from './api';
 
@@ -16,7 +17,6 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const [amountInput, setAmountInput] = useState('');
   
-  // Use a hardcoded test bank account ID for the MVP since we didn't build a bank account API
   const testBankAccountId = '00000000-0000-0000-0000-000000000000';
 
   const { data: balance, isLoading: balanceLoading, isError: balanceError } = useQuery({
@@ -47,61 +47,88 @@ export default function Dashboard() {
     payoutMutation.mutate(amountRs * 100);
   };
 
+  // Calculate percentages for liquid bar
+  const totalBalance = (balance?.available_balance || 0) + (balance?.held_balance || 0);
+  const heldPercentage = totalBalance > 0 ? ((balance?.held_balance || 0) / totalBalance) * 100 : 0;
+  const availablePercentage = totalBalance > 0 ? ((balance?.available_balance || 0) / totalBalance) * 100 : 0;
+
   return (
-    <div className="min-h-screen p-8 max-w-6xl mx-auto space-y-8">
-      <header className="flex items-center justify-between">
+    <div className="min-h-screen p-8 max-w-6xl mx-auto space-y-12">
+      <header className="flex items-center justify-between mb-12">
         <div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
-            Playto Payout Engine
+          <h1 className="text-4xl font-extrabold text-white tracking-[0.2em] uppercase">
+            Payto Merchant Payment Dashboard
           </h1>
-          <p className="text-payto-muted mt-1">Merchant Dashboard</p>
+          <p className="text-[#888888] mt-2 tracking-widest text-sm uppercase">Payout Engine</p>
         </div>
       </header>
 
       {/* Balance Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="glass-panel p-6 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <CreditCard size={64} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="glass-panel p-8 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+            <CreditCard size={80} />
           </div>
-          <h3 className="text-payto-muted font-medium mb-2">Available Balance</h3>
+          <h3 className="text-[#737373] tracking-[0.1em] text-sm uppercase font-semibold mb-4">Available Balance</h3>
           {balanceLoading ? (
-            <div className="h-10 w-32 bg-neutral-700 rounded animate-pulse" />
+            <div className="h-10 w-32 bg-[#111] rounded animate-pulse" />
           ) : balanceError ? (
             <div className="text-red-400 flex items-center"><AlertCircle className="mr-2" /> Error loading</div>
           ) : (
-            <div className="text-4xl font-bold text-white tracking-tight">
-              {formatCurrency(balance?.available_balance || 0)}
-            </div>
+            <>
+              <div className="text-5xl font-light text-white tracking-wider">
+                {formatCurrency(balance?.available_balance || 0)}
+              </div>
+              {/* Liquid Progress Bar */}
+              <div className="mt-6 h-2 w-full bg-[#111] rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${availablePercentage}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  className="h-full bg-white rounded-full"
+                />
+              </div>
+            </>
           )}
         </div>
 
-        <div className="glass-panel p-6 relative overflow-hidden group border-orange-500/20">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Activity size={64} />
+        <div className="glass-panel p-8 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+            <Activity size={80} />
           </div>
-          <h3 className="text-orange-200/70 font-medium mb-2">Held for Processing</h3>
+          <h3 className="text-[#737373] tracking-[0.1em] text-sm uppercase font-semibold mb-4">Pending Execution</h3>
           {balanceLoading ? (
-            <div className="h-10 w-32 bg-neutral-700 rounded animate-pulse" />
+            <div className="h-10 w-32 bg-[#111] rounded animate-pulse" />
           ) : (
-            <div className="text-4xl font-bold text-orange-400 tracking-tight">
-              {formatCurrency(balance?.held_balance || 0)}
-            </div>
+            <>
+              <div className="text-5xl font-light text-white tracking-wider">
+                {formatCurrency(balance?.held_balance || 0)}
+              </div>
+              {/* Liquid Progress Bar with Mercury effect */}
+              <div className="mt-6 h-2 w-full bg-[#111] rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${heldPercentage}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  className="h-full bg-white mercury-liquid rounded-full"
+                />
+              </div>
+            </>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         
         {/* Payout Request Form */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="glass-panel p-6">
-            <h2 className="text-xl font-semibold mb-4">Request Payout</h2>
-            <form onSubmit={handlePayoutSubmit} className="space-y-4">
+          <div className="glass-panel p-8">
+            <h2 className="text-sm text-[#888888] tracking-[0.15em] uppercase font-semibold mb-6">Execute Order</h2>
+            <form onSubmit={handlePayoutSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm text-payto-muted mb-1">Amount (INR)</label>
+                <label className="block text-xs text-[#555555] tracking-widest uppercase mb-2">Amount (INR)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">₹</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#555]">₹</span>
                   <input
                     type="number"
                     step="0.01"
@@ -109,22 +136,24 @@ export default function Dashboard() {
                     required
                     value={amountInput}
                     onChange={(e) => setAmountInput(e.target.value)}
-                    className="w-full bg-neutral-800 border border-neutral-700 rounded-lg py-2 pl-8 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-payto-accent transition-all"
+                    className="w-full bg-[#0a0a0a] border border-white/5 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-white/20 focus:bg-[#111] transition-all font-light tracking-wider"
                     placeholder="0.00"
                     disabled={payoutMutation.isPending}
                   />
                 </div>
               </div>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={payoutMutation.isPending}
-                className="w-full bg-payto-accent hover:bg-payto-accent-hover text-black font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
+                className="w-full bg-white hover:bg-gray-200 text-black font-semibold tracking-widest uppercase text-sm py-3.5 rounded-xl transition-colors flex items-center justify-center disabled:opacity-50"
               >
-                {payoutMutation.isPending ? 'Processing...' : 'Withdraw Funds'}
-              </button>
+                {payoutMutation.isPending ? 'Processing...' : 'Withdraw'}
+              </motion.button>
               {payoutMutation.isError && (
-                <p className="text-sm text-red-400 mt-2">
-                  {(payoutMutation.error as any)?.response?.data?.error || 'Failed to request payout'}
+                <p className="text-xs tracking-wide text-red-400 mt-3">
+                  {(payoutMutation.error as any)?.response?.data?.error || 'Execution failed.'}
                 </p>
               )}
             </form>
@@ -133,34 +162,48 @@ export default function Dashboard() {
 
         {/* Payout History */}
         <div className="lg:col-span-2">
-          <div className="glass-panel p-6 min-h-[400px]">
-            <h2 className="text-xl font-semibold mb-4">Recent Payouts</h2>
+          <div className="glass-panel p-8 min-h-[400px]">
+            <h2 className="text-sm text-[#888888] tracking-[0.15em] uppercase font-semibold mb-6">Execution Log</h2>
             
             {payoutsLoading ? (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="h-16 bg-neutral-800 rounded-lg animate-pulse" />
+                  <div key={i} className="h-20 bg-[#0c0c0c] rounded-xl animate-pulse" />
                 ))}
               </div>
             ) : payouts?.length === 0 ? (
-              <div className="text-center text-payto-muted py-12">
-                No payouts found
+              <div className="text-center text-[#555] tracking-widest uppercase text-sm py-16">
+                No executions found
               </div>
             ) : (
-              <div className="space-y-3">
-                {payouts?.map((payout: any) => (
-                  <div key={payout.id} className="bg-neutral-800/50 rounded-lg p-4 flex items-center justify-between border border-neutral-700/50 hover:bg-neutral-800 transition-colors">
-                    <div>
-                      <div className="text-lg font-medium">{formatCurrency(payout.amount)}</div>
-                      <div className="text-xs text-payto-muted mt-1 font-mono">
-                        {new Date(payout.created_at).toLocaleString()}
+              <div className="space-y-4">
+                <AnimatePresence>
+                  {payouts?.map((payout: any) => (
+                    <motion.div 
+                      key={payout.id} 
+                      layout
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      whileHover={{ scale: 1.02 }}
+                      className={clsx(
+                        "magnetic-row flex items-center justify-between relative overflow-hidden",
+                        payout.state === 'COMPLETED' ? "gold-shimmer" : ""
+                      )}
+                    >
+                      <div className="relative z-10">
+                        <div className="text-xl font-light tracking-wider text-white">
+                          {formatCurrency(payout.amount)}
+                        </div>
+                        <div className="text-[10px] text-[#555] mt-1 tracking-widest uppercase">
+                          {new Date(payout.created_at).toLocaleString()}
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      <PayoutStatusBadge status={payout.state} />
-                    </div>
-                  </div>
-                ))}
+                      <div className="relative z-10">
+                        <PayoutStatusBadge status={payout.state} />
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
             )}
           </div>
@@ -171,18 +214,18 @@ export default function Dashboard() {
 }
 
 function PayoutStatusBadge({ status }: { status: string }) {
-  const baseClasses = "px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5";
+  const baseClasses = "px-3 py-1 rounded-full text-[10px] tracking-widest uppercase font-semibold flex items-center gap-1.5 border";
   
   switch (status) {
     case 'COMPLETED':
-      return <span className={clsx(baseClasses, "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20")}><CheckCircle size={14}/> Completed</span>;
+      return <span className={clsx(baseClasses, "bg-white/5 text-white border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.1)]")}><CheckCircle size={12}/> Completed</span>;
     case 'PROCESSING':
-      return <span className={clsx(baseClasses, "bg-blue-500/10 text-blue-400 border border-blue-500/20")}><Activity size={14} className="animate-pulse"/> Processing</span>;
+      return <span className={clsx(baseClasses, "bg-transparent text-[#888] border-[#333]")}><Activity size={12} className="animate-pulse"/> Processing</span>;
     case 'PENDING':
-      return <span className={clsx(baseClasses, "bg-orange-500/10 text-orange-400 border border-orange-500/20")}><Clock size={14}/> Pending</span>;
+      return <span className={clsx(baseClasses, "bg-transparent text-[#555] border-[#222]")}><Clock size={12}/> Pending</span>;
     case 'FAILED':
-      return <span className={clsx(baseClasses, "bg-red-500/10 text-red-400 border border-red-500/20")}><XCircle size={14}/> Failed</span>;
+      return <span className={clsx(baseClasses, "bg-red-500/5 text-red-400 border-red-500/20")}><XCircle size={12}/> Failed</span>;
     default:
-      return <span className={clsx(baseClasses, "bg-gray-500/10 text-gray-400")}>{status}</span>;
+      return <span className={clsx(baseClasses, "bg-transparent text-[#555] border-[#222]")}>{status}</span>;
   }
 }
