@@ -1,0 +1,81 @@
+services:
+  # -----------------------------
+  # Django Web Service
+  # -----------------------------
+  - type: web
+    name: payout-backend
+    env: python
+    plan: free
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py migrate
+    startCommand: gunicorn config.wsgi:application
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: DATABASE_URL
+        fromDatabase:
+          name: payout-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: payout-redis
+          property: connectionString
+
+  # -----------------------------
+  # Celery Worker
+  # -----------------------------
+  - type: worker
+    name: payout-worker
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A config worker -l INFO
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings
+      - key: DATABASE_URL
+        fromDatabase:
+          name: payout-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: payout-redis
+          property: connectionString
+
+  # -----------------------------
+  # Celery Beat
+  # -----------------------------
+  - type: worker
+    name: payout-beat
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A config beat -l INFO
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings
+      - key: DATABASE_URL
+        fromDatabase:
+          name: payout-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: payout-redis
+          property: connectionString
+
+  # -----------------------------
+  # Redis
+  # -----------------------------
+  - type: redis
+    name: payout-redis
+    plan: free
+
+databases:
+  - name: payout-db
+    plan: free
