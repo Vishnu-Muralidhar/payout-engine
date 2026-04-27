@@ -34,8 +34,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-local-only')
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
-
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',') + [
+    'payout-engine-ymge.onrender.com',
+]
 # Application definition
 
 INSTALLED_APPS = [
