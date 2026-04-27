@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
 
-const MERCHANT_ID = '1c01fc52-6303-40b8-a161-f38f4e7f2647';
+const MERCHANT_ID = '1c01fc52-6303-40b8-a161-f38f4e7f2647'; // replace with actual seeded merchant id
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -22,12 +23,8 @@ export const getPayouts = async () => {
   return data;
 };
 
-// ✅ FIX: idempotency key is now passed from caller
-export const createPayout = async (
-  amountPaise: number,
-  bankAccountId: string,
-  idempotencyKey: string
-) => {
+export const createPayout = async (amountPaise: number, bankAccountId: string) => {
+  const idempotencyKey = uuidv4();
   const { data } = await apiClient.post(
     '/payouts/',
     {
